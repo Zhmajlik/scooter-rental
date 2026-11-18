@@ -8,6 +8,7 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from "@expo-google-fonts/inter";
+import { AuthProvider } from "./contexts/AuthContext";
 import { LoginScreen } from "./screens/LoginScreen";
 import { MapScreen } from "./screens/MapScreen";
 import { ScootersListScreen } from "./screens/ScootersListScreen";
@@ -35,47 +36,50 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Map"
-          component={MapScreen}
-          options={({ navigation }) => ({
-            title: "Карта",
-            headerRight: () => (
-              <Pressable
-                onPress={() => navigation.navigate("ScootersList")}
-                style={{ marginRight: 8 }}
-              >
-                <Text
-                  style={{
-                    color: "#1DB584",
-                    fontSize: 16,
-                    fontFamily: "Inter_600SemiBold",
-                  }}
+    <AuthProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Login">
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Map"
+            component={MapScreen}
+            options={({ navigation }) => ({
+              title: "Карта",
+              headerBackVisible: false,
+              headerRight: () => (
+                <Pressable
+                  onPress={() => navigation.navigate("ScootersList")}
+                  style={{ marginRight: 8 }}
                 >
-                  Все самокаты
-                </Text>
-              </Pressable>
-            ),
-          })}
-        />
-        <Stack.Screen
-          name="ScootersList"
-          component={ScootersListScreen}
-          options={{ title: "Самокаты" }}
-        />
-        <Stack.Screen
-          name="Trip"
-          component={TripScreen}
-          options={{ title: "Поездка" }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+                  <Text
+                    style={{
+                      color: "#1DB584",
+                      fontSize: 16,
+                      fontFamily: "Inter_600SemiBold",
+                    }}
+                  >
+                    Все самокаты
+                  </Text>
+                </Pressable>
+              ),
+            })}
+          />
+          <Stack.Screen
+            name="ScootersList"
+            component={ScootersListScreen}
+            options={{ title: "Все самокаты" }}
+          />
+          <Stack.Screen
+            name="Trip"
+            component={TripScreen}
+            options={{ title: "Поездка" }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </AuthProvider>
   );
 }

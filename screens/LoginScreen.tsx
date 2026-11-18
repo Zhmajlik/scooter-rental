@@ -1,15 +1,54 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, TextInput, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../App";
+import { Button } from "../components/Button";
+import { FormField } from "../components/FormField";
+import { useForm } from "../hooks/useForm";
+import { useAuth } from "../contexts/AuthContext";
+
+type LoginValues = { phone: string; code: string };
+
+function validate(values: LoginValues) {
+  const errors: Record<string, string> = {};
+  const digits = values.phone.replace(/\D/g, "");
+
+  if (!digits) {
+    errors.phone = "Введите номер телефона";
+  } else if (digits.length !== 9) {
+    errors.phone = "Нужно 9 цифр после +375, например (29) 123-45-67";
+  }
+
+  if (!values.code) {
+    errors.code = "Введите код из SMS";
+  } else if (!/^\d{4}$/.test(values.code)) {
+    errors.code = "Код состоит из 4 цифр";
+  }
+
+  return errors;
+}
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 export function LoginScreen({ navigation }: Props) {
+  const { login } = useAuth();
+  const { values, errors, handleChange, handleSubmit } = useForm<LoginValues>(
+    { phone: "", code: "" },
+    validate,
+  );
+
+  function onSubmit() {
+    handleSubmit((validValues) => {
+      const digits = validValues.phone.replace(/\D/g, "");
+      login(`+375 ${digits}`);
+      navigation.replace("Map");
+    });
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.logoBox}>
-        <MaterialCommunityIcons name="scooter" size={56} color="#FFFFFF" />
+        <MaterialCommunityIcons name="scooter" size={52} color="#FFFFFF" />
       </View>
 
       <Text style={styles.title}>Поехали!</Text>
@@ -17,22 +56,40 @@ export function LoginScreen({ navigation }: Props) {
         Авторизуйтесь, чтобы находить и бронировать самокаты поблизости
       </Text>
 
-      <Text style={styles.label}>Номер телефона</Text>
-      <View style={styles.phoneRow}>
-        <View style={styles.codeBox}>
-          <Text style={styles.codeText}>+375</Text>
-        </View>
-        <View style={styles.phoneInput}>
-          <Text style={styles.placeholder}>(29) 000-00-00</Text>
-        </View>
+      <View style={styles.form}>
+        <FormField label="Номер телефона" error={errors.phone}>
+          <View style={styles.phoneRow}>
+            <View style={styles.codeBox}>
+              <Text style={styles.codeText}>+375</Text>
+            </View>
+            <TextInput
+              style={styles.phoneInput}
+              value={values.phone}
+              onChangeText={(text) => handleChange("phone", text)}
+              placeholder="(29) 000-00-00"
+              placeholderTextColor="#9AA3AF"
+              keyboardType="phone-pad"
+              maxLength={15}
+            />
+          </View>
+        </FormField>
+
+        <FormField label="Код из SMS" error={errors.code}>
+          <TextInput
+            style={styles.input}
+            value={values.code}
+            onChangeText={(text) => handleChange("code", text)}
+            placeholder="0000"
+            placeholderTextColor="#9AA3AF"
+            keyboardType="number-pad"
+            maxLength={4}
+          />
+        </FormField>
       </View>
 
-      <Pressable
-        style={styles.primaryButton}
-        onPress={() => navigation.navigate("Map")}
-      >
-        <Text style={styles.primaryButtonText}>Получить код</Text>
-      </Pressable>
+      <Button variant="primary" onPress={onSubmit}>
+        Войти
+      </Button>
 
       <View style={styles.dividerRow}>
         <View style={styles.line} />
@@ -40,9 +97,10 @@ export function LoginScreen({ navigation }: Props) {
         <View style={styles.line} />
       </View>
 
-      <Pressable style={styles.secondaryButton}>
-        <Text style={styles.secondaryButtonText}>Войти по E-mail</Text>
-      </Pressable>
+      <Button variant="secondary" onPress={() => {}}>
+        Войти по E-mail
+      </Button>
+
       <Text style={styles.terms}>
         Нажимая кнопку, вы соглашаетесь с{" "}
         <Text style={styles.link}>Условиями использования</Text> и{" "}
@@ -56,11 +114,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    paddingTop: 80,
+    paddingTop: 56,
     paddingHorizontal: 24,
   },
   logoBox: {
-    height: 100,
+    height: 90,
     borderRadius: 16,
     backgroundColor: "#1DB584",
     alignItems: "center",
@@ -71,7 +129,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_700Bold",
     color: "#14181F",
     textAlign: "center",
-    marginTop: 32,
+    marginTop: 28,
   },
   subtitle: {
     fontSize: 15,
@@ -81,13 +139,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     lineHeight: 22,
   },
-  label: {
-    fontSize: 15,
-    fontFamily: "Inter_400Regular",
-    color: "#14181F",
-    marginTop: 32,
-    marginBottom: 8,
-  },
+  form: { marginTop: 24 },
   phoneRow: { flexDirection: "row" },
   codeBox: {
     paddingHorizontal: 16,
@@ -108,23 +160,19 @@ const styles = StyleSheet.create({
     borderColor: "#D5DAE1",
     borderTopRightRadius: 10,
     borderBottomRightRadius: 10,
-  },
-  placeholder: {
     fontSize: 16,
     fontFamily: "Inter_400Regular",
-    color: "#9AA3AF",
+    color: "#14181F",
   },
-  primaryButton: {
-    marginTop: 16,
-    paddingVertical: 16,
+  input: {
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: "#D5DAE1",
     borderRadius: 10,
-    backgroundColor: "#1DB584",
-    alignItems: "center",
-  },
-  primaryButtonText: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
-    color: "#FFFFFF",
+    fontFamily: "Inter_400Regular",
+    color: "#14181F",
   },
   dividerRow: {
     flexDirection: "row",
@@ -138,20 +186,9 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     color: "#5A6472",
   },
-  secondaryButton: {
-    paddingVertical: 16,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#D5DAE1",
-    alignItems: "center",
-  },
-  secondaryButtonText: {
-    fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
-    color: "#14181F",
-  },
   terms: {
     marginTop: "auto",
+    paddingTop: 16,
     marginBottom: 24,
     textAlign: "center",
     fontSize: 12,
@@ -159,7 +196,5 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     color: "#9AA3AF",
   },
-  link: {
-    textDecorationLine: "underline",
-  },
+  link: { textDecorationLine: "underline" },
 });

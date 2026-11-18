@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../App";
 import { ScooterCard } from "../components/ScooterCard";
+import { useAuth } from "../contexts/AuthContext";
 
 const scooters = [
   {
@@ -48,8 +51,10 @@ const scooters = [
 ];
 
 type Tab = "all" | "favorites";
+type Props = NativeStackScreenProps<RootStackParamList, "ScootersList">;
 
-export function ScootersListScreen() {
+export function ScootersListScreen({ navigation }: Props) {
+  const { user, logout } = useAuth();
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<Tab>("all");
 
@@ -57,6 +62,11 @@ export function ScootersListScreen() {
     setFavoriteIds((prev) =>
       prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id],
     );
+  }
+
+  function handleLogout() {
+    logout();
+    navigation.reset({ index: 0, routes: [{ name: "Login" }] });
   }
 
   const visibleScooters =
@@ -67,6 +77,15 @@ export function ScootersListScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Ближайшие самокаты</Text>
+
+      {user ? (
+        <View style={styles.authBar}>
+          <Text style={styles.authText}>Вы вошли как {user}</Text>
+          <Pressable onPress={handleLogout}>
+            <Text style={styles.authLink}>Выйти</Text>
+          </Pressable>
+        </View>
+      ) : null}
 
       <View style={styles.tabs}>
         <Pressable
@@ -129,6 +148,22 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_700Bold",
     color: "#14181F",
     marginBottom: 12,
+  },
+  authBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  authText: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    color: "#5A6472",
+  },
+  authLink: {
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
+    color: "#E5403A",
   },
   tabs: { flexDirection: "row", gap: 8, marginBottom: 16 },
   tab: {

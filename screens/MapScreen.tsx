@@ -1,8 +1,9 @@
-import { View, Text, Image, Pressable, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../App";
 import { MapPin } from "../components/MapPin";
+import { Button } from "../components/Button";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Map">;
 
@@ -94,12 +95,9 @@ export function MapScreen({ navigation }: Props) {
           </View>
         </View>
 
-        <Pressable
-          style={styles.startButton}
-          onPress={() => navigation.navigate("Trip")}
-        >
-          <Text style={styles.startButtonText}>Начать поездку</Text>
-        </Pressable>
+        <Button variant="primary" onPress={() => navigation.navigate("Trip")}>
+          Начать поездку
+        </Button>
       </View>
     </View>
   );
@@ -203,21 +201,5 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     color: "#14181F",
     lineHeight: 22,
-  },
-  startButton: {
-    paddingVertical: 16,
-    borderRadius: 14,
-    backgroundColor: "#1DB584",
-    alignItems: "center",
-    shadowColor: "#1DB584",
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 5,
-  },
-  startButtonText: {
-    fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
-    color: "#FFFFFF",
   },
 });

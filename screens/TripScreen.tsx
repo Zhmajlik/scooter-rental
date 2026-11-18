@@ -3,6 +3,8 @@ import { View, Text, Image, Pressable, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../App";
+import { Button } from "../components/Button";
+import { useAuth } from "../contexts/AuthContext";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Trip">;
 
@@ -11,6 +13,7 @@ const MIN_MINUTES = 1;
 const MAX_MINUTES = 60;
 
 export function TripScreen({ navigation }: Props) {
+  const { user } = useAuth();
   const [isPaused, setIsPaused] = useState(false);
   const [minutes, setMinutes] = useState(10);
 
@@ -52,6 +55,7 @@ export function TripScreen({ navigation }: Props) {
             ]}
           />
         </View>
+        {user ? <Text style={styles.account}>Аккаунт: {user}</Text> : null}
 
         <View style={styles.statsRow}>
           <View style={styles.stat}>
@@ -119,9 +123,9 @@ export function TripScreen({ navigation }: Props) {
           </Pressable>
         </View>
 
-        <Pressable style={styles.endButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.endButtonText}>Завершить поездку</Text>
-        </Pressable>
+        <Button variant="danger" onPress={() => navigation.goBack()}>
+          Завершить поездку
+        </Button>
 
         <Text style={styles.help}>Нужна помощь?</Text>
       </View>
@@ -241,21 +245,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   actionButtonActive: { backgroundColor: "#F2A623" },
-  endButton: {
-    paddingVertical: 16,
-    borderRadius: 14,
-    backgroundColor: "#E5403A",
-    alignItems: "center",
-    shadowColor: "#E5403A",
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 5,
-  },
-  endButtonText: {
-    fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
-    color: "#FFFFFF",
+  account: {
+    textAlign: "center",
+    marginTop: 6,
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: "#5A6472",
   },
   help: {
     textAlign: "center",
