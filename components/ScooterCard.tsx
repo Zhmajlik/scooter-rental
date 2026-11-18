@@ -1,13 +1,21 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 type ScooterCardProps = {
   model: string;
   charge: string;
   tariff: string;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
 };
 
-export function ScooterCard({ model, charge, tariff }: ScooterCardProps) {
+export function ScooterCard({
+  model,
+  charge,
+  tariff,
+  isFavorite,
+  onToggleFavorite,
+}: ScooterCardProps) {
   return (
     <View style={styles.card}>
       <View style={styles.iconBox}>
@@ -16,8 +24,15 @@ export function ScooterCard({ model, charge, tariff }: ScooterCardProps) {
       <View style={styles.info}>
         <Text style={styles.model}>{model}</Text>
         <Text style={styles.details}>Заряд {charge}</Text>
+        <Text style={styles.tariff}>{tariff}</Text>
       </View>
-      <Text style={styles.tariff}>{tariff}</Text>
+      <Pressable onPress={onToggleFavorite} hitSlop={10}>
+        <MaterialCommunityIcons
+          name={isFavorite ? "heart" : "heart-outline"}
+          size={26}
+          color={isFavorite ? "#E5403A" : "#9AA3AF"}
+        />
+      </Pressable>
     </View>
   );
 }
@@ -48,5 +63,10 @@ const styles = StyleSheet.create({
     color: "#5A6472",
     marginTop: 2,
   },
-  tariff: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#1DB584" },
+  tariff: {
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
+    color: "#1DB584",
+    marginTop: 2,
+  },
 });

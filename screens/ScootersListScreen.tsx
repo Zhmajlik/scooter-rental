@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { useState } from "react";
+import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
 import { ScooterCard } from "../components/ScooterCard";
 
 const scooters = [
@@ -32,22 +33,86 @@ const scooters = [
     charge: "66%",
     tariff: "0.24 BYN/мин",
   },
+  {
+    id: "6",
+    model: "Ninebot KickScooter P65",
+    charge: "91%",
+    tariff: "0.27 BYN/мин",
+  },
+  {
+    id: "7",
+    model: "Xiaomi Mi Scooter Essential",
+    charge: "49%",
+    tariff: "0.20 BYN/мин",
+  },
 ];
 
+type Tab = "all" | "favorites";
+
 export function ScootersListScreen() {
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<Tab>("all");
+
+  function toggleFavorite(id: string) {
+    setFavoriteIds((prev) =>
+      prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id],
+    );
+  }
+
+  const visibleScooters =
+    activeTab === "all"
+      ? scooters
+      : scooters.filter((s) => favoriteIds.includes(s.id));
+
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Ближайшие самокаты</Text>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {scooters.map((scooter) => (
+
+      <View style={styles.tabs}>
+        <Pressable
+          onPress={() => setActiveTab("all")}
+          style={activeTab === "all" ? styles.tabActive : styles.tab}
+        >
+          <Text
+            style={activeTab === "all" ? styles.tabTextActive : styles.tabText}
+          >
+            Все
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setActiveTab("favorites")}
+          style={activeTab === "favorites" ? styles.tabActive : styles.tab}
+        >
+          <Text
+            style={
+              activeTab === "favorites" ? styles.tabTextActive : styles.tabText
+            }
+          >
+            Избранное{favoriteIds.length > 0 && ` (${favoriteIds.length})`}
+          </Text>
+        </Pressable>
+      </View>
+
+      <FlatList
+        data={visibleScooters}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+        renderItem={({ item }) => (
           <ScooterCard
-            key={scooter.id}
-            model={scooter.model}
-            charge={scooter.charge}
-            tariff={scooter.tariff}
+            model={item.model}
+            charge={item.charge}
+            tariff={item.tariff}
+            isFavorite={favoriteIds.includes(item.id)}
+            onToggleFavorite={() => toggleFavorite(item.id)}
           />
-        ))}
-      </ScrollView>
+        )}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>
+            Пока нет избранных самокатов. Нажмите на сердечко на карточке.
+          </Text>
+        }
+      />
     </View>
   );
 }
@@ -64,5 +129,33 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_700Bold",
     color: "#14181F",
     marginBottom: 12,
+  },
+  tabs: { flexDirection: "row", gap: 8, marginBottom: 16 },
+  tab: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: "#FFFFFF",
+  },
+  tabActive: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: "#1DB584",
+  },
+  tabText: { fontSize: 14, fontFamily: "Inter_500Medium", color: "#14181F" },
+  tabTextActive: {
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+    color: "#FFFFFF",
+  },
+  listContent: { paddingBottom: 24 },
+  emptyText: {
+    fontSize: 15,
+    fontFamily: "Inter_400Regular",
+    color: "#5A6472",
+    textAlign: "center",
+    marginTop: 40,
+    lineHeight: 22,
   },
 });
